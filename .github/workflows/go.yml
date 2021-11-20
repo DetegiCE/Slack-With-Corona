@@ -17,8 +17,9 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.17
-    - name: Install dependencies
+    - name: Preferences
       run: |
+        go env -w GO111MODULE=auto
         go get github.com/joho/godotenv
     - name: Build and Run
       run: go build -v main.go
