@@ -3,11 +3,13 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/joho/godotenv"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -63,24 +65,33 @@ func Get_Corona_Info(url string) CoronaInfo {
 		log.Fatal(jsonErr)
 	}
 
+	fmt.Println(coronaInfo)
 	return coronaInfo
 }
 
 func Post_Corona_Info(url string, coronaInfo CoronaInfo) {
 	data := make(map[string]interface{})
-	data["text"] = coronaInfo.CasesSummary.TotalCases
+	data["text"] = strconv.Itoa(coronaInfo.CasesSummary.TotalCases)
 	body, _ := json.Marshal(data)
 	buff := bytes.NewBuffer(body)
 
+	fmt.Println(buff)
+	fmt.Println(url)
 	req, reqErr := http.NewRequest(http.MethodPost, url, buff)
 	if reqErr != nil {
 		log.Fatal(reqErr)
 	}
 	req.Header.Add("Content-Type", "application/json")
 
-	client := http.Client{}
+	client := http.Client{
+		Timeout: time.Second * 2,
+	}
+
 	res, postErr := client.Do(req)
 	if postErr != nil {
+		log.Fatal(postErr)
+	}
+	if res.Body != nil {
 		defer res.Body.Close()
 	}
 }
