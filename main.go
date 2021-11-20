@@ -90,8 +90,9 @@ func Slack_Mrkdwn(text string) map[string]interface{} {
 }
 
 func Build_Current_Time() string {
-	then := time.Now()
-	return then.Month().String() + " " + strconv.Itoa(then.Day()) + ", " + strconv.Itoa(then.Hour()) + ":" + strconv.Itoa(then.Minute())
+	loc, _ := time.LoadLocation("Asia/Seoul")
+	then := time.Now().In(loc)
+	return fmt.Sprintf("%s %02d, %02d:%02d", then.Month(), then.Day(), then.Hour(), then.Minute())
 }
 
 func Build_Slack_Message(tod string, yes string) map[string]interface{} {
