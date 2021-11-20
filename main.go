@@ -76,7 +76,6 @@ func Post_Corona_Info(url string, coronaInfo CoronaInfo) {
 	buff := bytes.NewBuffer(body)
 
 	fmt.Println(buff)
-	fmt.Println(url)
 	req, reqErr := http.NewRequest(http.MethodPost, url, buff)
 	if reqErr != nil {
 		log.Fatal(reqErr)
