@@ -14,17 +14,21 @@ import (
 )
 
 type CoronaInfo struct {
+	Overview     Overview     `json:"overview"`
 	CasesSummary CasesSummary `json:"casesSummary"`
+}
+
+type Overview struct {
+	Current   [2]int `json:"current"`
+	Recovered [2]int `json:"recovered"`
+	Deceased  [2]int `json:"deceased"`
+	Confirmed [2]int `json:"confirmed"`
 }
 
 type CasesSummary struct {
 	Checking       int `json:"checking"`
 	TotalCases     int `json:"totalCases"`
 	YesterdayCases int `json:"yesterdayCases"`
-}
-
-type SlackMessage struct {
-	Text string `json:"text"`
 }
 
 func Dot_Env_Variable(key string) string {
@@ -69,9 +73,44 @@ func Get_Corona_Info(url string) CoronaInfo {
 	return coronaInfo
 }
 
-func Post_Corona_Info(url string, coronaInfo CoronaInfo) {
+func Slack_Divider() map[string]interface{} {
 	data := make(map[string]interface{})
-	data["text"] = strconv.Itoa(coronaInfo.CasesSummary.TotalCases)
+	data["type"] = "divider"
+	return data
+}
+
+func Slack_Mrkdwn(text string) map[string]interface{} {
+	data := make(map[string]interface{})
+	innerData := make(map[string]interface{})
+	data["type"] = "section"
+	innerData["type"] = "mrkdwn"
+	innerData["text"] = text
+	data["text"] = innerData
+	return data
+}
+
+func Build_Current_Time() string {
+	then := time.Now()
+	return then.Month().String() + " " + strconv.Itoa(then.Day()) + ", " + strconv.Itoa(then.Hour()) + ":" + strconv.Itoa(then.Minute())
+}
+
+func Build_Slack_Message(tod string, yes string) map[string]interface{} {
+	block := make(map[string]interface{})
+	var data [4]map[string]interface{}
+
+	data[0] = Slack_Mrkdwn("*" + Build_Current_Time() + "* 기준 대한민국 코로나 현황입니다.")
+	data[1] = Slack_Divider()
+	data[2] = Slack_Mrkdwn(":hot_face:\n오늘 현재까지 확진자 수 *" + tod + "* 명\n어제 동시간 대비 *" + yes + "* 명")
+	data[3] = Slack_Divider()
+
+	block["blocks"] = data
+	return block
+}
+
+func Post_Corona_Info(url string, coronaInfo CoronaInfo) {
+	today := strconv.Itoa(coronaInfo.CasesSummary.TotalCases)
+	yesterday := strconv.Itoa(coronaInfo.Overview.Current[1])
+	data := Build_Slack_Message(today, yesterday)
 	body, _ := json.Marshal(data)
 	buff := bytes.NewBuffer(body)
 
