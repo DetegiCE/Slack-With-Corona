@@ -22,4 +22,7 @@ jobs:
         go env -w GO111MODULE=auto
         go get github.com/joho/godotenv
     - name: Build and Run
-      run: go build -v main.go
+      run: |
+        go build -v main.go
+        go run main.go
+        
