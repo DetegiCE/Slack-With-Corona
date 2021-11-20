@@ -17,6 +17,11 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.17
+    - name: Set up Environment Variables
+      run: |
+        echo "SLACK_WEBHOOK_URL=$SLACK_WEBHOOK_URL" >> .env
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     - name: Preferences
       run: |
         go env -w GO111MODULE=auto
